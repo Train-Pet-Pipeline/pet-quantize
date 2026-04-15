@@ -102,6 +102,7 @@ def run_audio_inference(
     model_path: str,
     audio_paths: list[str],
     device_id: str | None = None,
+    audio_config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run audio CNN INT8 inference on a list of audio files.
 
@@ -109,11 +110,14 @@ def run_audio_inference(
         model_path: Path to the .rknn audio model.
         audio_paths: List of audio file paths.
         device_id: ADB device ID, or None for simulated mode.
+        audio_config: Audio config dict from params.yaml (sample_rate, n_mels,
+            classes). Falls back to defaults if not provided.
 
     Returns:
         Dict with keys: predictions (list[str]), confidences (list[float]),
         timings (list[float]).
     """
+    audio_config = audio_config or {}
     target = "rk3576" if device_id else None
     runner = RKNNRunner(model_path, target=target, device_id=device_id)
     runner.init()
@@ -121,11 +125,15 @@ def run_audio_inference(
     predictions: list[str] = []
     confidences: list[float] = []
     timings: list[float] = []
-    classes = ["eating", "drinking", "vomiting", "ambient", "other"]
+    classes = audio_config.get(
+        "classes", ["eating", "drinking", "vomiting", "ambient", "other"]
+    )
+    sample_rate = audio_config.get("sample_rate", 16000)
+    n_mels = audio_config.get("n_mels", 64)
 
     try:
         for audio_path in audio_paths:
-            features = _load_audio_features(audio_path)
+            features = _load_audio_features(audio_path, sample_rate=sample_rate, n_mels=n_mels)
             outputs, elapsed_ms = runner.infer([features])
 
             logits = outputs[0].flatten()
@@ -145,28 +153,34 @@ def run_audio_inference(
     }
 
 
-def _load_audio_features(audio_path: str) -> np.ndarray:
+def _load_audio_features(
+    audio_path: str,
+    sample_rate: int = 16000,
+    n_mels: int = 64,
+) -> np.ndarray:
     """Load audio file and extract log-mel spectrogram features.
 
     Args:
         audio_path: Path to an audio file.
+        sample_rate: Target sample rate (from params.yaml audio.sample_rate).
+        n_mels: Number of mel bands (from params.yaml audio.n_mels).
 
     Returns:
-        Numpy array of shape [1, 1, 64, T] (batch, channel, n_mels, time).
+        Numpy array of shape [1, 1, n_mels, T] (batch, channel, n_mels, time).
     """
     import torchaudio
 
     waveform, sr = torchaudio.load(audio_path)
-    if sr != 16000:
-        waveform = torchaudio.functional.resample(waveform, sr, 16000)
+    if sr != sample_rate:
+        waveform = torchaudio.functional.resample(waveform, sr, sample_rate)
 
     mel_transform = torchaudio.transforms.MelSpectrogram(
-        sample_rate=16000, n_mels=64
+        sample_rate=sample_rate, n_mels=n_mels
     )
     mel = mel_transform(waveform)
     log_mel = (mel + 1e-8).log()
 
-    # Shape: [1, 1, 64, T]
+    # Shape: [1, 1, n_mels, T]
     return log_mel.unsqueeze(0).numpy()
 
 
