@@ -143,4 +143,4 @@ class TestSetupLogging:
             for h in named_logger.handlers[:]:
                 named_logger.removeHandler(h)
             for h in original_handlers:
-                root.addHandler(h)
+                named_logger.addHandler(h)
