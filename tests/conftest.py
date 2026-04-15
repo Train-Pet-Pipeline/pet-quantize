@@ -123,14 +123,17 @@ def sample_calib_db(tmp_dir: Path) -> Path:
 
     rows = []
     frame_id = 1
-    # ~400 rows: cycle through all combinations with enough repetition
-    for i in range(400):
-        lighting = lighting_values[i % len(lighting_values)]
-        action = action_values[i % len(action_values)]
-        breed = breeds[i % len(breeds)]
-        image_path = f"/data/frames/frame_{frame_id:05d}.jpg"
-        rows.append((image_path, lighting, action, breed))
-        frame_id += 1
+    # ~400 rows: cover all 16 (lighting × action_primary) combinations with enough repetition.
+    # Each of the 16 buckets gets ~25 frames; breeds cycle across all rows.
+    breed_idx = 0
+    for lighting in lighting_values:
+        for action in action_values:
+            for _ in range(60):
+                breed = breeds[breed_idx % len(breeds)]
+                image_path = f"/data/frames/frame_{frame_id:05d}.jpg"
+                rows.append((image_path, lighting, action, breed))
+                frame_id += 1
+                breed_idx += 1
 
     cur.executemany(
         "INSERT INTO frames (image_path, lighting, action_primary, breed) VALUES (?, ?, ?, ?)",
