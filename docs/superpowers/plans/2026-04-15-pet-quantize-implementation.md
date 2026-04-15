@@ -19,6 +19,7 @@
 | File | Responsibility |
 |---|---|
 | `pyproject.toml` | Package metadata, ruff/mypy config |
+| `requirements.txt` | pip-compile locked dependencies |
 | `Makefile` | setup/test/lint/clean/calibrate/convert/validate/package/all targets |
 | `params.yaml` | All numeric configuration |
 | `.env.example` | Environment variable documentation |
@@ -87,6 +88,7 @@ requires-python = ">=3.11,<3.12"
 dependencies = [
     "pet-schema==1.0.0",
     "torch>=2.1",
+    "torchaudio>=2.1",
     "transformers>=4.44,<5.0",
     "onnx>=1.14,<2.0",
     "pydantic>=2.0,<3.0",
@@ -302,7 +304,12 @@ Also create:
 - `artifacts/converted/.gitkeep`
 - `artifacts/release/.gitkeep`
 
-- [ ] **Step 7: Verify setup**
+- [ ] **Step 7: Generate requirements.txt with pip-compile**
+
+Run: `pip-compile pyproject.toml -o requirements.txt`
+Expected: Locked requirements.txt generated
+
+- [ ] **Step 8: Verify setup**
 
 Run: `cd /Users/bamboo/Githubs/Train-Pet-Pipeline/pet-quantize && make setup`
 Expected: Successful pip install
@@ -310,7 +317,7 @@ Expected: Successful pip install
 Run: `make lint`
 Expected: No errors (empty package passes lint)
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add -A
