@@ -1,15 +1,14 @@
 """Export vision encoder from HuggingFace model to ONNX format."""
+from __future__ import annotations
 
 import logging
 from pathlib import Path
-
-import torch
-from transformers import AutoModel
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def export_vision_encoder(config: dict) -> str:
+def export_vision_encoder(config: dict[str, Any]) -> str:
     """Export the vision encoder sub-model to ONNX.
 
     Loads the HuggingFace model from config["weights_dir"], extracts
@@ -25,6 +24,8 @@ def export_vision_encoder(config: dict) -> str:
     Raises:
         FileNotFoundError: If weights_dir does not exist.
     """
+    import torch
+    from transformers import AutoModel
 
     weights_dir = Path(config["weights_dir"])
     if not weights_dir.exists():
