@@ -4,13 +4,11 @@ Loads and validates params.yaml via Pydantic, and configures structured JSON log
 All numeric values are read from params.yaml — never hardcoded here.
 """
 
-import logging
-import sys
 from pathlib import Path
 
 import yaml
+from pet_infra.logging import setup_logging as _infra_setup_logging
 from pydantic import BaseModel, ConfigDict, Field
-from pythonjsonlogger import jsonlogger
 
 # ---------------------------------------------------------------------------
 # Pydantic models
@@ -158,23 +156,5 @@ def load_params(path: Path) -> QuantizeParams:
 
 
 def setup_logging() -> None:
-    """Configure root logger to emit structured JSON log records.
-
-    Idempotent: if a :class:`~pythonjsonlogger.jsonlogger.JsonFormatter`-backed
-    handler is already attached to the root logger, no additional handler is added.
-    """
-    root = logging.getLogger()
-
-    # Guard: skip if a JSON handler is already present
-    for handler in root.handlers:
-        if isinstance(handler.formatter, jsonlogger.JsonFormatter):
-            return
-
-    handler = logging.StreamHandler(sys.stdout)
-    formatter = jsonlogger.JsonFormatter(
-        fmt="%(asctime)s %(name)s %(levelname)s %(message)s",
-        datefmt="%Y-%m-%dT%H:%M:%S",
-    )
-    handler.setFormatter(formatter)
-    root.addHandler(handler)
-    root.setLevel(logging.INFO)
+    """Configure structured JSON logging."""
+    _infra_setup_logging("pet-quantize")
