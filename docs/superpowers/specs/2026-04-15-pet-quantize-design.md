@@ -159,7 +159,11 @@ false-blocking development iteration.
    - Reads prompt files from installed pet-schema package
    - Computes sha256 for each file
    - Reads schema_version and prompt_version from pet-schema package metadata
-   - Generates `manifest.json` (version, schema_version, prompt_version, files, build_timestamp)
+   - Reads lora_version from input weight directory metadata or params.yaml
+   - Generates `manifest.json` with all required fields:
+     version, schema_version, prompt_version, lora_version, min_firmware,
+     build_timestamp, files (with path/sha256/size_bytes each), release_notes
+   - release_notes sourced from params.yaml or CLI argument
    - Creates tarball
 
 2. `sign_package.py`:
@@ -179,6 +183,11 @@ Output: `artifacts/release/`
 ## 4. Inference Interface
 
 The `inference/` module is the bridge between pet-quantize and pet-eval.
+
+> **Note:** The DEVELOPMENT_GUIDE's directory listing for pet-quantize does not include
+> `inference/`. This module is an extension required by the pet-eval integration
+> (filling TODO stubs in `eval_quantized.py`). The `src/` layout also follows the
+> established convention of all other repos rather than the guide's simplified listing.
 
 ### 4.1 VLM Pipeline
 
@@ -305,7 +314,7 @@ convert:
 # === Inference ===
 inference:
   schema_version: "1.0"
-  simulated_sample_size: 50
+  simulated_sample_size: 50      # Consumed by pet-eval's eval_quantized in simulated mode
   device:
     adb_timeout: 30
     warmup_runs: 3
@@ -318,8 +327,10 @@ validate:
 
 # === Packaging ===
 packaging:
-  version: ""
+  version: ""                   # CI injects or manual
+  lora_version: ""              # From pet-train output metadata
   min_firmware: "2.0.0"
+  release_notes: ""             # CLI arg or CI injects
 
 # === wandb ===
 wandb:
