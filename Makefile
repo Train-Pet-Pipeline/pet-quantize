@@ -1,17 +1,12 @@
-.PHONY: setup test lint clean calibrate convert validate package all
+-include ../pet-infra/shared/Makefile.include
+
+.PHONY: setup test calibrate convert validate package all
 
 setup:
 	pip install -e ".[dev]"
 
 test:
 	pytest tests/ -v
-
-lint:
-	ruff check src/ tests/ && mypy src/
-
-clean:
-	rm -rf .pytest_cache .mypy_cache .ruff_cache dist/ *.egg-info \
-		artifacts/converted/* artifacts/release/*
 
 calibrate:
 	python -m pet_quantize.calibration.build_calib_dataset
