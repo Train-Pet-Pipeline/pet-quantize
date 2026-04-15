@@ -13,6 +13,7 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +83,7 @@ def verify_package(
 
         pub_key_data = Path(public_key_path).read_bytes()
         public_key = serialization.load_pem_public_key(pub_key_data)
+        assert isinstance(public_key, RSAPublicKey)
 
         try:
             public_key.verify(
