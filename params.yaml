@@ -1,0 +1,65 @@
+# === Calibration ===
+calibration:
+  frame_count: 200
+  tolerance: 0.05
+  min_breeds: 5
+  distribution:
+    lighting:
+      bright: 0.40
+      dim: 0.20
+      infrared_night: 0.20
+      unknown: 0.20
+    action_primary:
+      eating: 0.50
+      sniffing_only: 0.20
+      leaving_bowl: 0.15
+      other: 0.15
+  exclude:
+    train_ids_path: ""
+    gold_set_path: ""
+  data_db_path: ""
+  output_dir: "artifacts/calibration"
+
+# === Conversion ===
+convert:
+  vision:
+    input_size: [448, 448]
+    onnx_opset: 17
+    rknn_target: "rk3576"
+    rknn_dtype: "fp16"
+  llm:
+    rkllm_target: "rk3576"
+    quantization: "w8a8"
+  audio:
+    rknn_target: "rk3576"
+    rknn_dtype: "int8"
+  weights_dir: ""
+  audio_checkpoint: ""
+  output_dir: "artifacts/converted"
+
+# === Inference ===
+inference:
+  schema_version: "1.0"
+  simulated_sample_size: 50
+  device:
+    adb_timeout: 30
+    warmup_runs: 3
+    latency_runs: 20
+  fp16_weights_dir: ""
+
+# === Validation (smoke) ===
+validate:
+  smoke_sample_size: 30
+  kl_threshold: 0.05
+
+# === Packaging ===
+packaging:
+  version: ""
+  lora_version: ""
+  min_firmware: "2.0.0"
+  release_notes: ""
+
+# === wandb ===
+wandb:
+  project: "pet-quantize"
+  entity: ""
