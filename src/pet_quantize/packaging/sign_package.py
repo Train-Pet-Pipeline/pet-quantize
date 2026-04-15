@@ -10,6 +10,7 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ def sign_package(
     # Load private key
     key_data = Path(private_key_path).read_bytes()
     private_key = serialization.load_pem_private_key(key_data, password=None)
+    assert isinstance(private_key, RSAPrivateKey)
 
     # Read tarball
     tarball_data = Path(tarball_path).read_bytes()

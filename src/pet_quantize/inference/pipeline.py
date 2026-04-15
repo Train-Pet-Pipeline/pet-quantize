@@ -108,7 +108,7 @@ def _run_fp16_reference(
     for img_path in image_paths:
         prompt = _build_prompt(img_path, schema_version)
         inputs = processor(text=prompt, images=img_path, return_tensors="pt")
-        generated = model.generate(**inputs, max_new_tokens=2048)
+        generated = model.generate(**inputs, max_new_tokens=2048)  # type: ignore[misc]
         text = processor.decode(generated[0], skip_special_tokens=True)
         outputs.append(text)
 

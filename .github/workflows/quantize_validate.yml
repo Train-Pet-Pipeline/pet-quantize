@@ -1,0 +1,29 @@
+# Quantize Validation — place in pet-quantize/.github/workflows/quantize_validate.yml
+name: Quantize Validate
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_artifact:
+        description: "Path to quantized model artifact"
+        required: true
+
+jobs:
+  validate-on-device:
+    runs-on: [self-hosted, rk3576]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: make setup
+
+      - name: Run device validation
+        run: |
+          python -m pet_quantize.validate \
+            --model "${{ github.event.inputs.model_artifact }}" \
+            --device rknn

@@ -89,15 +89,15 @@ class TestSetupLogging:
 
     def test_setup_logging_json_format(self, capfd: pytest.CaptureFixture[str]) -> None:
         """setup_logging configures JSON output that can be parsed."""
-        # Reset root logger handlers before testing
-        root = logging.getLogger()
-        original_handlers = root.handlers[:]
-        for h in root.handlers[:]:
-            root.removeHandler(h)
+        # Reset the named logger handlers before testing
+        named_logger = logging.getLogger("pet-quantize")
+        original_handlers = named_logger.handlers[:]
+        for h in named_logger.handlers[:]:
+            named_logger.removeHandler(h)
 
         try:
             setup_logging()
-            logger = logging.getLogger("pet_quantize.test_json")
+            logger = logging.getLogger("pet-quantize")
             logger.info("test message", extra={"key": "value"})
 
             captured = capfd.readouterr()
@@ -114,33 +114,33 @@ class TestSetupLogging:
                         continue
 
             assert json_line is not None, f"No JSON log line found in output: {output!r}"
-            assert "message" in json_line or "msg" in json_line
+            assert "event" in json_line or "message" in json_line or "msg" in json_line
         finally:
             # Restore original handlers
-            for h in root.handlers[:]:
-                root.removeHandler(h)
+            for h in named_logger.handlers[:]:
+                named_logger.removeHandler(h)
             for h in original_handlers:
-                root.addHandler(h)
+                named_logger.addHandler(h)
 
     def test_setup_logging_idempotent(self) -> None:
         """Calling setup_logging twice does not duplicate JSON handlers."""
-        root = logging.getLogger()
-        original_handlers = root.handlers[:]
-        for h in root.handlers[:]:
-            root.removeHandler(h)
+        named_logger = logging.getLogger("pet-quantize")
+        original_handlers = named_logger.handlers[:]
+        for h in named_logger.handlers[:]:
+            named_logger.removeHandler(h)
 
         try:
             setup_logging()
-            count_after_first = len(root.handlers)
+            count_after_first = len(named_logger.handlers)
 
             setup_logging()
-            count_after_second = len(root.handlers)
+            count_after_second = len(named_logger.handlers)
 
             assert count_after_second == count_after_first, (
                 f"Handlers duplicated: {count_after_first} -> {count_after_second}"
             )
         finally:
-            for h in root.handlers[:]:
-                root.removeHandler(h)
+            for h in named_logger.handlers[:]:
+                named_logger.removeHandler(h)
             for h in original_handlers:
-                root.addHandler(h)
+                named_logger.addHandler(h)
