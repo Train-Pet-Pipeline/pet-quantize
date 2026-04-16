@@ -5,6 +5,8 @@ import tempfile
 from pathlib import Path
 
 import torch
+import yaml
+from pet_infra.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -83,3 +85,18 @@ def convert_audio_to_rknn(config: dict, calib_dir: str) -> str:
         logger.debug("Cleaned up temporary ONNX file: %s", tmp_onnx_path)
 
     return str(output_path)
+
+
+def main() -> None:
+    """CLI entry point for audio CNN RKNN conversion."""
+    setup_logging("pet-quantize")
+    with open("params.yaml") as fh:
+        params = yaml.safe_load(fh)
+    convert_cfg = params["convert"]
+    calib_dir = str(Path(params["calibration"]["output_dir"]))
+    result = convert_audio_to_rknn(convert_cfg, calib_dir)
+    logger.info("Audio RKNN exported", extra={"path": result})
+
+
+if __name__ == "__main__":
+    main()

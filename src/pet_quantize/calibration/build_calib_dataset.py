@@ -11,6 +11,9 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
+import yaml
+from pet_infra.logging import setup_logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -200,3 +203,16 @@ def build_calib_dataset(config: dict[str, Any]) -> list[dict[str, str]]:
 
     logger.info("calibration dataset built", extra={"sampled": len(sampled)})
     return sampled
+
+
+def main() -> None:
+    """CLI entry point for calibration dataset building."""
+    setup_logging("pet-quantize")
+    with open("params.yaml") as fh:
+        params = yaml.safe_load(fh)
+    sampled = build_calib_dataset(params["calibration"])
+    logger.info("Calibration dataset complete", extra={"count": len(sampled)})
+
+
+if __name__ == "__main__":
+    main()

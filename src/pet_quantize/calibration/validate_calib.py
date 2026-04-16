@@ -8,6 +8,9 @@ All thresholds are read from the supplied config dict — never hardcoded.
 from dataclasses import dataclass, field
 from typing import Any
 
+import yaml
+from pet_infra.logging import setup_logging
+
 # ---------------------------------------------------------------------------
 # Module-level constants
 # ---------------------------------------------------------------------------
@@ -135,3 +138,29 @@ def validate_calibration_dataset(
         )
 
     return CalibValidationResult(passed=len(violations) == 0, violations=violations)
+
+
+def main() -> None:
+    """CLI entry point for calibration validation."""
+    import logging
+
+    setup_logging("pet-quantize")
+    logger = logging.getLogger(__name__)
+
+    with open("params.yaml") as fh:
+        params = yaml.safe_load(fh)
+
+    from pet_quantize.calibration.build_calib_dataset import build_calib_dataset
+    frames = build_calib_dataset(params["calibration"])
+    result = validate_calibration_dataset(frames, params["calibration"])
+
+    if result.passed:
+        logger.info("Calibration validation PASSED")
+    else:
+        for v in result.violations:
+            logger.error("Calibration violation: %s", v)
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()
