@@ -3,6 +3,9 @@
 import logging
 from pathlib import Path
 
+import yaml
+from pet_infra.logging import setup_logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -58,3 +61,18 @@ def convert_vision_to_rknn(
         raise RuntimeError(f"RKNN export failed with code {ret}")
 
     return str(output_path)
+
+
+def main() -> None:
+    """CLI entry point for RKNN vision conversion."""
+    setup_logging("pet-quantize")
+    with open("params.yaml") as fh:
+        params = yaml.safe_load(fh)
+    convert_cfg = params["convert"]
+    onnx_path = str(Path(convert_cfg["output_dir"]) / "vision_encoder.onnx")
+    result = convert_vision_to_rknn(onnx_path, convert_cfg)
+    logger.info("Vision RKNN exported", extra={"path": result})
+
+
+if __name__ == "__main__":
+    main()
