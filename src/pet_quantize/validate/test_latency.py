@@ -51,4 +51,5 @@ def test_latency(params: dict, model_dir: str, device_id: str | None) -> None:
     assert len(timings) > 0, "No timing data collected"
 
     p95 = float(np.percentile(timings, 95))
-    assert p95 <= 4000, f"P95 latency {p95:.0f}ms > 4000ms threshold"
+    threshold = params["gates"]["vlm"]["latency_p95_ms"]
+    assert p95 <= threshold, f"P95 latency {p95:.0f}ms > {threshold}ms threshold"
