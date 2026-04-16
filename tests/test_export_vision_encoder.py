@@ -72,12 +72,15 @@ def test_export_creates_onnx_file(vision_config: dict[str, Any]) -> None:
 
 
 def test_export_uses_correct_opset(vision_config: dict[str, Any]) -> None:
-    """Verify opset_version=17 is passed to torch.onnx.export."""
+    """Verify opset_version >= 18 is passed to torch.onnx.export.
+
+    PyTorch 2.11+ requires opset >= 18; the exporter applies max(configured, 18).
+    """
     mock_torch, mock_automodel = _make_mocks()
     _run_with_mocks(mock_torch, mock_automodel, vision_config)
 
     _, kwargs = mock_torch.onnx.export.call_args
-    assert kwargs.get("opset_version") == 17
+    assert kwargs.get("opset_version") >= 18
 
 
 def test_export_missing_weights_dir(tmp_path: Path, sample_params: dict[str, Any]) -> None:
