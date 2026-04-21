@@ -28,7 +28,10 @@ def register_all() -> None:
     try:
         import rknn.api  # noqa: F401
 
-        from pet_quantize.plugins.converters import vision_rknn_fp16  # noqa: F401
+        from pet_quantize.plugins.converters import (
+            audio_rknn_fp16,  # noqa: F401
+            vision_rknn_fp16,  # noqa: F401
+        )
     except ImportError as exc:
         if not os.environ.get("PET_ALLOW_MISSING_SDK"):
             raise
