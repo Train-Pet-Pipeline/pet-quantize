@@ -1,13 +1,14 @@
 """PET_ALLOW_MISSING_SDK env gate tests.
 
-Note: in P2-B the SDK-gated clusters are empty (no imports to fail), so the
-gate's re-raise behavior cannot be exercised here yet. That test lands in
-P2-C when real SDK-backed plugins register. These tests verify the affordance
-exists and register_all() is callable under both env settings.
+P2-C added real SDK-gated imports (rkllm cluster). Gate behavior now:
+- PET_ALLOW_MISSING_SDK=1 → register_all() succeeds, warns about missing SDK
+- PET_ALLOW_MISSING_SDK unset → register_all() raises ModuleNotFoundError
 """
 from __future__ import annotations
 
 import sys
+
+import pytest
 
 
 def test_missing_sdk_env_set_passes(monkeypatch) -> None:
@@ -18,9 +19,10 @@ def test_missing_sdk_env_set_passes(monkeypatch) -> None:
     register_all()
 
 
-def test_missing_sdk_env_unset_still_passes_when_gates_empty(monkeypatch) -> None:
-    """register_all() succeeds when gates have no imports (P2-B state)."""
+def test_missing_sdk_env_unset_raises_on_gated_import(monkeypatch) -> None:
+    """register_all() raises ModuleNotFoundError when rkllm SDK missing and gate unset."""
     monkeypatch.delenv("PET_ALLOW_MISSING_SDK", raising=False)
     sys.modules.pop("pet_quantize.plugins._register", None)
     from pet_quantize.plugins._register import register_all
-    register_all()  # empty try-bodies don't raise ImportError
+    with pytest.raises(ModuleNotFoundError, match="rkllm"):
+        register_all()
