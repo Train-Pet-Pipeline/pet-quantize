@@ -82,10 +82,6 @@ def sample_params() -> dict[str, Any]:
             "min_firmware": "2.0.0",
             "release_notes": "Initial release",
         },
-        "wandb": {
-            "project": "pet-quantize",
-            "entity": "",
-        },
     }
 
 
