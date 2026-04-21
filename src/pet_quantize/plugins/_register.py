@@ -7,6 +7,7 @@ ImportError and re-raise unless PET_ALLOW_MISSING_SDK=1 is set.
 from __future__ import annotations
 
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +25,15 @@ def register_all() -> None:
     from pet_quantize.plugins.converters import noop  # noqa: F401
 
     # RKNN-gated cluster (populated by P2-D/P2-E/P2-F)
-    # P2-C+: from pet_quantize.plugins.converters import vision_rknn_fp16, audio_rknn_fp16
-    # P2-C+: from pet_quantize.plugins.datasets import vision_calibration, audio_calibration
+    # P2-D+: from pet_quantize.plugins.converters import vision_rknn_fp16, audio_rknn_fp16
+    # P2-F+: from pet_quantize.plugins.datasets import vision_calibration, audio_calibration
 
-    # RKLLM-gated cluster (populated by P2-C/P2-F)
-    # P2-C+: from pet_quantize.plugins.converters import vlm_rkllm_w4a16
-    # P2-C+: from pet_quantize.plugins.datasets import vlm_calibration
+    # RKLLM-gated cluster (P2-C adds vlm_rkllm_w4a16; P2-F adds vlm_calibration_subset)
+    try:
+        from rkllm.api import RKLLM  # noqa: F401
+
+        from pet_quantize.plugins.converters import vlm_rkllm_w4a16  # noqa: F401
+    except ImportError as exc:
+        if not os.environ.get("PET_ALLOW_MISSING_SDK"):
+            raise
+        logger.warning("rkllm SDK missing; gated plugins skipped: %s", exc)

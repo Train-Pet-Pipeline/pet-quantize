@@ -39,6 +39,8 @@ jobs:
           fi
 
       - name: Test
+        env:
+          PET_ALLOW_MISSING_SDK: "1"
         run: |
           if [ "${{ steps.gpu.outputs.available }}" = "true" ]; then
             pytest tests/ -v --tb=short
