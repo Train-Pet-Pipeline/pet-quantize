@@ -1,4 +1,4 @@
-"""Tests for audio CNN to INT8 RKNN conversion."""
+"""Tests for audio CNN to FP16 RKNN conversion."""
 
 import sys
 from pathlib import Path
@@ -32,14 +32,6 @@ def audio_config(tmp_path: Path, sample_params: dict[str, Any]) -> dict[str, Any
 
 
 @pytest.fixture()
-def calib_dir(tmp_path: Path) -> str:
-    """Return path to a dummy calibration directory."""
-    d = tmp_path / "calib"
-    d.mkdir(exist_ok=True)
-    return str(d)
-
-
-@pytest.fixture()
 def mock_rknn_instance() -> MagicMock:
     """Return a configured mock RKNN instance with all return values set to 0."""
     instance = MagicMock()
@@ -51,7 +43,6 @@ def mock_rknn_instance() -> MagicMock:
 
 def test_convert_creates_rknn_file(
     audio_config: dict[str, Any],
-    calib_dir: str,
     mock_rknn_instance: MagicMock,
 ) -> None:
     """Mock torch.load + RKNN, verify output path ends with .rknn."""
@@ -61,35 +52,34 @@ def test_convert_creates_rknn_file(
         mock_torch.load.return_value = MagicMock()
         mock_torch.zeros.return_value = MagicMock()
 
-        result = _audio_mod.convert_audio_to_rknn(audio_config, calib_dir)
+        result = _audio_mod.convert_audio_to_rknn(audio_config)
 
     assert result.endswith(".rknn")
-    assert "audio_cnn_int8" in result
+    assert "audio_cnn_fp16" in result
     mock_rknn_instance.export_rknn.assert_called_once()
 
 
-def test_convert_uses_int8_quantization(
+def test_convert_uses_fp16_no_quantization(
     audio_config: dict[str, Any],
-    calib_dir: str,
     mock_rknn_instance: MagicMock,
 ) -> None:
-    """Verify build is called with do_quantization=True for INT8."""
+    """Verify build is called with do_quantization=False for FP16."""
     _fake_rknn_cls.return_value = mock_rknn_instance
 
     with patch.object(_audio_mod, "torch") as mock_torch:
         mock_torch.load.return_value = MagicMock()
         mock_torch.zeros.return_value = MagicMock()
 
-        _audio_mod.convert_audio_to_rknn(audio_config, calib_dir)
+        _audio_mod.convert_audio_to_rknn(audio_config)
 
     _, kwargs = mock_rknn_instance.build.call_args
-    assert kwargs.get("do_quantization") is True
+    assert kwargs.get("do_quantization") is False
+    assert "dataset" not in kwargs
 
 
 def test_convert_missing_checkpoint_raises(
     tmp_path: Path,
     sample_params: dict[str, Any],
-    calib_dir: str,
 ) -> None:
     """Nonexistent audio_checkpoint raises FileNotFoundError."""
     cfg = dict(sample_params["convert"])
@@ -98,4 +88,4 @@ def test_convert_missing_checkpoint_raises(
 
     with patch.object(_audio_mod, "torch"):
         with pytest.raises(FileNotFoundError):
-            _audio_mod.convert_audio_to_rknn(cfg, calib_dir)
+            _audio_mod.convert_audio_to_rknn(cfg)
