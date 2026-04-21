@@ -9,8 +9,8 @@ name = "pet-quantize"
 version = "0.1.0"
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    "pet-schema @ git+https://github.com/Train-Pet-Pipeline/pet-schema.git@v1.0.0",
-    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v1.0.0",
+    "pet-schema @ git+https://github.com/Train-Pet-Pipeline/pet-schema.git@v2.3.1",
+    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v2.4.0-rc1",
     "torch>=2.1",
     "torchaudio>=2.1",
     "transformers>=4.44,<5.0",
@@ -29,6 +29,9 @@ dev = [
     "ruff",
     "mypy",
 ]
+
+[project.entry-points."pet_infra.plugins"]
+pet_quantize = "pet_quantize.plugins._register:register_all"
 
 [tool.setuptools.packages.find]
 where = [
