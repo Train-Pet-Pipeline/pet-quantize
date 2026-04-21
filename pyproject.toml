@@ -9,8 +9,8 @@ name = "pet-quantize"
 version = "0.1.0"
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    "pet-schema",
-    "pet-infra",
+    "pet-schema @ git+https://github.com/Train-Pet-Pipeline/pet-schema.git@v2.3.1",
+    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v2.3.0",
     "torch>=2.1",
     "torchaudio>=2.1",
     "transformers>=4.44,<5.0",
