@@ -24,7 +24,10 @@ def register_all() -> None:
     # Always-available (zero-dep)
     from pet_quantize.plugins.converters import noop  # noqa: F401
 
-    # RKNN-gated cluster (P2-D adds vision; P2-E adds audio; P2-F adds datasets)
+    # RKNN-gated cluster: converters + calibration datasets that feed them.
+    # Datasets are grouped here (not always-available) because registering a
+    # dataset plugin that feeds a missing converter has no value and incurs the
+    # torch-import cost in CI runs where the SDK is absent.
     try:
         import rknn.api  # noqa: F401
 
@@ -32,16 +35,21 @@ def register_all() -> None:
             audio_rknn_fp16,  # noqa: F401
             vision_rknn_fp16,  # noqa: F401
         )
+        from pet_quantize.plugins.datasets import (
+            audio_calibration_subset,  # noqa: F401
+            vision_calibration_subset,  # noqa: F401
+        )
     except ImportError as exc:
         if not os.environ.get("PET_ALLOW_MISSING_SDK"):
             raise
         logger.warning("rknn SDK missing; gated plugins skipped: %s", exc)
 
-    # RKLLM-gated cluster (P2-C adds vlm_rkllm_w4a16; P2-F adds vlm_calibration_subset)
+    # RKLLM-gated cluster: vlm converter + vlm calibration dataset that feeds it.
     try:
         import rkllm.api  # noqa: F401
 
         from pet_quantize.plugins.converters import vlm_rkllm_w4a16  # noqa: F401
+        from pet_quantize.plugins.datasets import vlm_calibration_subset  # noqa: F401
     except ImportError as exc:
         if not os.environ.get("PET_ALLOW_MISSING_SDK"):
             raise
