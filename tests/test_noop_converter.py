@@ -3,10 +3,9 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-import pytest
+from pet_schema.model_card import ModelCard
 
 from pet_quantize.plugins.converters.noop import NoopConverter
-from pet_schema.model_card import ModelCard
 
 
 def _make_card(card_id: str = "test-card-1") -> ModelCard:

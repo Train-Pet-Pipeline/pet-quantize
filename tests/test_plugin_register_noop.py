@@ -1,8 +1,6 @@
 """NoopConverter + entry-point discovery registration tests."""
 from __future__ import annotations
 
-import pytest
-
 
 def test_noop_registers_via_register_all(monkeypatch) -> None:
     """register_all() triggers @CONVERTERS.register_module side-effect."""
