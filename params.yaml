@@ -75,8 +75,3 @@ audio:
   sample_rate: 16000
   n_mels: 64
   classes: ["eating", "drinking", "vomiting", "ambient", "other"]
-
-# === wandb ===
-wandb:
-  project: "pet-quantize"
-  entity: ""
