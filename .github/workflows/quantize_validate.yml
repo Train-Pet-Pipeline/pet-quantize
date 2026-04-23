@@ -1,12 +1,23 @@
-# Quantize Validation — place in pet-quantize/.github/workflows/quantize_validate.yml
 name: Quantize Validate
+
+# On-device smoke validation of quantized artifacts. The suite lives under
+# src/pet_quantize/validate/ (pytest-based, with --device-id CLI option via
+# conftest.py) and is intentionally excluded from default `pytest tests/`
+# so non-hardware runners skip it automatically.
+#
+# Triggered manually with a device serial; assumes the self-hosted rk3576
+# runner has the artifact directory mounted at the path passed in.
 
 on:
   workflow_dispatch:
     inputs:
-      model_artifact:
-        description: "Path to quantized model artifact"
+      device_id:
+        description: "ADB device serial number for the target rk3576 unit"
         required: true
+      model_dir:
+        description: "Directory containing converted *.rknn / *.rkllm artifacts"
+        required: false
+        default: "artifacts/converted"
 
 jobs:
   validate-on-device:
@@ -22,8 +33,9 @@ jobs:
       - name: Install dependencies
         run: make setup
 
-      - name: Run device validation
+      - name: Run device validation (pytest + --device-id)
+        env:
+          MODEL_DIR: ${{ github.event.inputs.model_dir }}
         run: |
-          python -m pet_quantize.validate \
-            --model "${{ github.event.inputs.model_artifact }}" \
-            --device rknn
+          pytest src/pet_quantize/validate/ -v \
+            --device-id "${{ github.event.inputs.device_id }}"
