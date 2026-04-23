@@ -18,6 +18,9 @@ from typing import Any
 from pet_infra.registry import CONVERTERS
 from pet_schema.model_card import EdgeArtifact, ModelCard, QuantConfig
 
+# Top-level imports are safe: both convert_to_rknn and export_vision_encoder
+# lazy-import rknn.api / transformers inside their public functions.
+# Module-load therefore does NOT trip the rknn / transformers SDK requirements.
 from pet_quantize.convert import convert_to_rknn as _rknn_mod
 from pet_quantize.convert import export_vision_encoder as _export_mod
 

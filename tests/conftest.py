@@ -82,6 +82,23 @@ def sample_params() -> dict[str, Any]:
             "min_firmware": "2.0.0",
             "release_notes": "Initial release",
         },
+        "gates": {
+            "vlm": {
+                "schema_compliance": 0.99,
+                "distribution_sum_error": 0.01,
+                "latency_p95_ms": 4000,
+                "kl_divergence": 0.02,
+            },
+            "audio": {
+                "overall_accuracy": 0.80,
+                "vomit_recall": 0.70,
+            },
+        },
+        "audio": {
+            "sample_rate": 16000,
+            "n_mels": 64,
+            "classes": ["eating", "drinking", "vomiting", "ambient", "other"],
+        },
     }
 
 

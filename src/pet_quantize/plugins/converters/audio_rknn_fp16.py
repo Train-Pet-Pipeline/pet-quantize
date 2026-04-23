@@ -14,6 +14,9 @@ from typing import Any
 from pet_infra.registry import CONVERTERS
 from pet_schema.model_card import EdgeArtifact, ModelCard, QuantConfig
 
+# Top-level import is safe: pet_quantize.convert.convert_audio itself
+# lazy-imports rknn.api inside convert_audio_to_rknn (see that module).
+# Module-load therefore does NOT trip the rknn SDK requirement.
 from pet_quantize.convert import convert_audio as _audio_mod
 
 
