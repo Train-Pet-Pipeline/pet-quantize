@@ -20,9 +20,13 @@ def test_missing_sdk_env_set_passes(monkeypatch) -> None:
 
 
 def test_missing_sdk_env_unset_raises_on_gated_import(monkeypatch) -> None:
-    """register_all() raises ModuleNotFoundError when rkllm SDK missing and gate unset."""
+    """register_all() raises ModuleNotFoundError when any gated SDK missing and gate unset.
+
+    Whichever cluster (rknn or rkllm) fires first depends on install order in the
+    local env; the test asserts gate behavior, not which SDK happened to trip it.
+    """
     monkeypatch.delenv("PET_ALLOW_MISSING_SDK", raising=False)
     sys.modules.pop("pet_quantize.plugins._register", None)
     from pet_quantize.plugins._register import register_all
-    with pytest.raises(ModuleNotFoundError, match="rkllm"):
+    with pytest.raises(ModuleNotFoundError, match=r"rknn|rkllm"):
         register_all()
