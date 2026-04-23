@@ -10,7 +10,7 @@ version = "2.0.1"
 requires-python = ">=3.11,<3.12"
 license = {text = "BUSL-1.1"}
 dependencies = [
-    "pet-schema @ git+https://github.com/Train-Pet-Pipeline/pet-schema.git@v2.4.0",
+    "pet-schema @ git+https://github.com/Train-Pet-Pipeline/pet-schema.git@v3.2.1",
     # pet-infra is a β peer-dep (install order enforced by CI + README
     # Prerequisites, not by pyproject resolution). See DEV_GUIDE §11.1.
     "torch>=2.1",
