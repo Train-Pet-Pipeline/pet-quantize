@@ -60,6 +60,10 @@ class VlmRkllmW4A16Converter:
             },
         }
 
+        # Lazy import: convert_to_rkllm transitively imports rkllm.api at function
+        # level, but pet-eval's test_module_load_does_not_import_rkllm_runner
+        # assertion depends on this module being importable without rkllm even
+        # loaded — keep the import inside run() to preserve that contract.
         import pet_quantize.convert.convert_to_rkllm as _rkllm_mod  # lazy (SDK-bound)
 
         output_path = _rkllm_mod.convert_llm_to_rkllm(config=config, calib_dir=cal_uri)
