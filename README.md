@@ -12,7 +12,7 @@ For local dev in the shared `pet-pipeline` conda env:
 conda activate pet-pipeline
 
 # 1. Install pet-infra peer-dep (current matrix row)
-pip install 'pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra@v2.6.0'
+pip install 'pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra@v2.9.5'
 
 # 2. Editable install
 make setup   # → pip install -e ".[dev]"
